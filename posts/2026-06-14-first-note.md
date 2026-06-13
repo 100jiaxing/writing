@@ -1,5 +1,5 @@
 ---
-title: 第一份笔录
+title: 第一篇文章
 date: 2026-06-14
 description: 这是第一篇示例文章。以后每天只要在 posts 目录写 Markdown，就能发布。
 tags: 写作, 日记

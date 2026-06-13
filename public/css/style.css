@@ -4,7 +4,8 @@
   --text: #171717;
   --muted: #5d5a53;
   --line: rgba(23, 23, 23, 0.16);
-  --panel: rgba(239, 238, 233, 0.88);
+  --panel: rgba(248, 247, 242, 0.82);
+  --paper: rgba(248, 247, 242, 0.74);
   --accent: #6d1f2b;
   --accent-strong: #4b121c;
   --code-bg: rgba(23, 23, 23, 0.07);
@@ -16,7 +17,8 @@
     --text: #eeeeea;
     --muted: #aaa69c;
     --line: rgba(238, 238, 234, 0.18);
-    --panel: rgba(20, 20, 19, 0.86);
+    --panel: rgba(24, 24, 23, 0.84);
+    --paper: rgba(30, 30, 28, 0.72);
     --accent: #c26f7d;
     --accent-strong: #f1b5bf;
     --code-bg: rgba(238, 238, 234, 0.1);
@@ -114,7 +116,7 @@ img {
 .hero {
   position: relative;
   display: grid;
-  min-height: calc(100dvh - 68px);
+  min-height: min(760px, calc(100dvh - 68px));
   overflow: hidden;
   border-bottom: 1px solid var(--line);
 }
@@ -123,15 +125,15 @@ img {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(239, 238, 233, 0.98) 0%, rgba(239, 238, 233, 0.82) 42%, rgba(239, 238, 233, 0.18) 100%),
+    linear-gradient(90deg, rgba(239, 238, 233, 0.97) 0%, rgba(239, 238, 233, 0.74) 48%, rgba(239, 238, 233, 0.22) 100%),
     url("../assets/kafka-desk.png") center right / cover no-repeat;
-  filter: grayscale(1) contrast(1.06);
+  filter: grayscale(1) contrast(0.96);
 }
 
 @media (prefers-color-scheme: dark) {
   .hero-media {
     background:
-      linear-gradient(90deg, rgba(20, 20, 19, 0.98) 0%, rgba(20, 20, 19, 0.78) 44%, rgba(20, 20, 19, 0.12) 100%),
+      linear-gradient(90deg, rgba(20, 20, 19, 0.98) 0%, rgba(20, 20, 19, 0.8) 48%, rgba(20, 20, 19, 0.18) 100%),
       url("../assets/kafka-desk.png") center right / cover no-repeat;
   }
 }
@@ -140,8 +142,12 @@ img {
   position: relative;
   z-index: 1;
   align-self: center;
-  width: min(760px, 100%);
-  padding: clamp(46px, 9vw, 112px) clamp(20px, 7vw, 96px);
+  width: min(700px, calc(100% - 40px));
+  margin-left: clamp(20px, 7vw, 96px);
+  padding: clamp(30px, 5vw, 58px);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  backdrop-filter: blur(16px);
 }
 
 .kicker {
@@ -152,19 +158,27 @@ img {
 }
 
 .hero h1 {
-  max-width: 10.5ch;
+  max-width: 14ch;
   margin: 0;
-  font-size: clamp(48px, 9vw, 112px);
-  line-height: 1.02;
-  font-weight: 700;
+  font-size: clamp(42px, 6.2vw, 78px);
+  line-height: 1.12;
+  font-weight: 600;
   letter-spacing: 0;
+  text-wrap: balance;
 }
 
 .hero-copy > p:not(.kicker) {
   max-width: 34rem;
-  margin: 24px 0 0;
+  margin: 20px 0 0;
   color: var(--muted);
   font-size: clamp(17px, 1.8vw, 21px);
+}
+
+.hero-copy .quote-source {
+  margin-top: 18px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  color: var(--accent);
 }
 
 .primary-link {
@@ -447,12 +461,14 @@ img {
 
   .hero-copy {
     align-self: end;
-    padding: 46px 20px 58px;
+    width: calc(100% - 32px);
+    margin: 0 auto 28px;
+    padding: 28px 22px 32px;
   }
 
   .hero h1 {
-    max-width: 8.6ch;
-    font-size: clamp(43px, 16vw, 68px);
+    max-width: 11ch;
+    font-size: clamp(36px, 12vw, 56px);
   }
 
   .writing-list,

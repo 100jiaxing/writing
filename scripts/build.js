@@ -9,6 +9,15 @@ const publicDir = path.join(root, "public");
 const distDir = path.join(root, "dist");
 const watchMode = process.argv.includes("--watch");
 const basePath = getBasePath();
+const dailyQuotes = [
+  { text: "生存还是毁灭，这是一个问题。", source: "莎士比亚" },
+  { text: "认识你自己。", source: "苏格拉底" },
+  { text: "人不是生来要给打败的。", source: "海明威" },
+  { text: "黑夜给了我黑色的眼睛。", source: "顾城" },
+  { text: "凡是过去，皆为序章。", source: "莎士比亚" },
+  { text: "世界以痛吻我，要我报之以歌。", source: "泰戈尔" },
+  { text: "生活不可能像你想象得那么好。", source: "莫泊桑" }
+];
 
 function getBasePath() {
   if (typeof config.basePath === "string" && config.basePath.trim()) {
@@ -174,6 +183,35 @@ function formatDate(dateString) {
   }).format(new Date(`${dateString}T00:00:00`));
 }
 
+function quoteForToday() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const day = Math.floor((now - start) / 86400000);
+  return dailyQuotes[day % dailyQuotes.length];
+}
+
+function renderDailyQuoteScript() {
+  return `<script type="application/json" id="daily-quotes">${JSON.stringify(dailyQuotes).replaceAll("<", "\\u003c")}</script>
+    <script>
+      (() => {
+        const quoteNode = document.getElementById("daily-quote");
+        const sourceNode = document.getElementById("daily-quote-source");
+        const dataNode = document.getElementById("daily-quotes");
+        if (!quoteNode || !sourceNode || !dataNode) return;
+        try {
+          const quotes = JSON.parse(dataNode.textContent);
+          const start = new Date(new Date().getFullYear(), 0, 0);
+          const day = Math.floor((new Date() - start) / 86400000);
+          const quote = quotes[day % quotes.length];
+          quoteNode.textContent = quote.text;
+          sourceNode.textContent = \`出自 \${quote.source}\`;
+        } catch {
+          return;
+        }
+      })();
+    </script>`;
+}
+
 function readPosts() {
   if (!fs.existsSync(postsDir)) return [];
 
@@ -233,6 +271,7 @@ function pageShell({ title, description, body, canonical = "" }) {
 
 function renderHome(posts) {
   const latest = posts[0];
+  const quote = quoteForToday();
   const list = posts
     .map((post) => `<article class="post-row">
       <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
@@ -247,8 +286,9 @@ function renderHome(posts) {
     <section class="hero">
       <div class="hero-media" role="img" aria-label="一张黑白写字台照片，纸张散落在窗边"></div>
       <div class="hero-copy">
-        <p class="kicker">个人写作室</p>
-        <h1>把每天的迟疑写成证词。</h1>
+        <p class="kicker">每日一句</p>
+        <h1 id="daily-quote">${escapeHtml(quote.text)}</h1>
+        <p class="quote-source" id="daily-quote-source">出自 ${escapeHtml(quote.source)}</p>
         <p>${escapeHtml(config.description)}</p>
         ${latest ? `<a class="primary-link" href="${escapeHtml(urlPath(`/posts/${latest.slug}/`))}">读最新一篇</a>` : ""}
       </div>
@@ -260,6 +300,7 @@ function renderHome(posts) {
       </div>
       <div class="post-list">${list || "<p>还没有文章。</p>"}</div>
     </section>
+    ${renderDailyQuoteScript()}
   </main>`;
 
   return pageShell({ title: config.title, description: config.description, body, canonical: "/" });
