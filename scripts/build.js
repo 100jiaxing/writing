@@ -9,6 +9,7 @@ const publicDir = path.join(root, "public");
 const distDir = path.join(root, "dist");
 const watchMode = process.argv.includes("--watch");
 const basePath = getBasePath();
+const buildVersion = String(Date.now());
 const dailyQuotes = [
   { text: "生存还是毁灭，这是一个问题。", author: "莎士比亚", work: "哈姆雷特" },
   { text: "人不是生来要给打败的。", author: "海明威", work: "老人与海" },
@@ -429,7 +430,7 @@ function renderSearch(posts) {
       <p id="search-status" class="search-status">${posts.length ? `共 ${posts.length} 篇文章可搜索。` : "还没有文章。"}</p>
     </section>
     <section id="search-results" class="search-results" aria-live="polite"></section>
-    <script src="${escapeHtml(urlPath("/js/search.js"))}" defer></script>
+    <script src="${escapeHtml(urlPath(`/js/search.js?v=${buildVersion}`))}" data-index-url="${escapeHtml(urlPath(`/search-index.json?v=${buildVersion}`))}" defer></script>
   </main>`;
 
   return pageShell({ title: "搜索", description: "搜索文章标题与全文", body, canonical: "/search.html", footerText: posts[0]?.excerpt });

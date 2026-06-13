@@ -110,7 +110,10 @@
     }).join("");
   };
 
-  fetch("search-index.json")
+  const currentScript = document.currentScript;
+  const indexUrl = currentScript?.dataset.indexUrl || "search-index.json";
+
+  fetch(indexUrl, { cache: "no-store" })
     .then((response) => {
       if (!response.ok) throw new Error("Cannot load search index.");
       return response.json();

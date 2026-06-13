@@ -24,6 +24,23 @@ function escapeYaml(value = "") {
   return String(value).replaceAll('"', '\\"');
 }
 
+function findPostByIssue(number) {
+  if (!number || number === "0" || !fs.existsSync(postsDir)) return "";
+
+  for (const file of fs.readdirSync(postsDir)) {
+    if (!file.endsWith(".md")) continue;
+    const raw = fs.readFileSync(path.join(postsDir, file), "utf8");
+    const frontmatter = raw.match(/^---\n([\s\S]*?)\n---/);
+    if (!frontmatter) continue;
+    const hasIssue = frontmatter[1]
+      .split("\n")
+      .some((line) => line.trim() === `issue: ${number}`);
+    if (hasIssue) return file;
+  }
+
+  return "";
+}
+
 function parseBody(raw) {
   const lines = raw.replace(/\r\n/g, "\n").split("\n");
   let tags = [];
@@ -83,6 +100,13 @@ if (!content) {
   throw new Error("Issue body is empty. Put the article Markdown in the issue body.");
 }
 
+const existingPost = findPostByIssue(issueNumber);
+if (existingPost) {
+  fs.writeFileSync("published-post-path.txt", existingPost);
+  console.log(`Issue #${issueNumber} already published as ${existingPost}`);
+  process.exit(0);
+}
+
 const date = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Shanghai",
   year: "numeric",
@@ -111,6 +135,7 @@ const frontmatter = [
   `title: ${escapeYaml(title)}`,
   `date: ${date}`,
   `time: ${time}`,
+  `issue: ${issueNumber}`,
   `description: ${escapeYaml(description)}`,
   tags.length ? `tags: ${tags.join(", ")}` : "tags: 写作",
   "---",
