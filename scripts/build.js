@@ -212,6 +212,18 @@ function renderDailyQuoteScript() {
     </script>`;
 }
 
+function plainTextFromMarkdown(markdown = "") {
+  return markdown
+    .replace(/^---\n[\s\S]*?\n---\n?/, "")
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[*_`>#-]/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .split(/\n{2,}/)
+    .map((block) => block.replace(/\s+/g, " ").trim())
+    .filter(Boolean)[0] || "";
+}
+
 function readPosts() {
   if (!fs.existsSync(postsDir)) return [];
 
@@ -230,15 +242,17 @@ function readPosts() {
         date: data.date || "1970-01-01",
         description: data.description || "",
         tags,
-        html: markdownToHtml(body)
+        html: markdownToHtml(body),
+        excerpt: plainTextFromMarkdown(body)
       };
     })
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-function pageShell({ title, description, body, canonical = "" }) {
+function pageShell({ title, description, body, canonical = "", footerText = "" }) {
   const fullTitle = title === config.title ? title : `${title} | ${config.title}`;
   const canonicalUrl = canonical ? `${config.siteUrl.replace(/\/$/, "")}${canonical}` : config.siteUrl;
+  const footer = footerText || config.description;
 
   return `<!doctype html>
 <html lang="${escapeHtml(config.language || "zh-CN")}">
@@ -257,13 +271,13 @@ function pageShell({ title, description, body, canonical = "" }) {
     <a class="brand" href="${escapeHtml(urlPath("/"))}" aria-label="${escapeHtml(config.title)} 首页">${escapeHtml(config.title)}</a>
     <nav class="nav" aria-label="主导航">
       <a href="${escapeHtml(urlPath("/"))}">文章</a>
-      <a href="${escapeHtml(urlPath("/archive.html"))}">档案</a>
+      <a href="${escapeHtml(urlPath("/archive.html"))}">归档</a>
       <a href="${escapeHtml(urlPath("/rss.xml"))}">RSS</a>
     </nav>
   </header>
   ${body}
   <footer class="site-footer">
-    <p>${escapeHtml(config.author)}. ${escapeHtml(config.description)}</p>
+    <p>${escapeHtml(footer)}</p>
   </footer>
 </body>
 </html>`;
@@ -272,6 +286,7 @@ function pageShell({ title, description, body, canonical = "" }) {
 function renderHome(posts) {
   const latest = posts[0];
   const quote = quoteForToday();
+  const footerText = latest?.excerpt || config.description;
   const list = posts
     .map((post) => `<article class="post-row">
       <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
@@ -286,10 +301,13 @@ function renderHome(posts) {
     <section class="hero">
       <div class="hero-media" role="img" aria-label="一张黑白写字台照片，纸张散落在窗边"></div>
       <div class="hero-copy">
-        <p class="kicker">每日一句</p>
-        <h1 id="daily-quote">${escapeHtml(quote.text)}</h1>
-        <p class="quote-source" id="daily-quote-source">出自 ${escapeHtml(quote.source)}</p>
-        <p>${escapeHtml(config.description)}</p>
+        <figure class="hero-quote">
+          <blockquote>
+            <h1 id="daily-quote">${escapeHtml(quote.text)}</h1>
+          </blockquote>
+          <figcaption id="daily-quote-source">出自 ${escapeHtml(quote.source)}</figcaption>
+        </figure>
+        <p>${escapeHtml(footerText)}</p>
         ${latest ? `<a class="primary-link" href="${escapeHtml(urlPath(`/posts/${latest.slug}/`))}">读最新一篇</a>` : ""}
       </div>
     </section>
@@ -303,7 +321,7 @@ function renderHome(posts) {
     ${renderDailyQuoteScript()}
   </main>`;
 
-  return pageShell({ title: config.title, description: config.description, body, canonical: "/" });
+  return pageShell({ title: config.title, description: config.description, body, canonical: "/", footerText });
 }
 
 function renderArchive(posts) {
@@ -326,13 +344,13 @@ function renderArchive(posts) {
 
   const body = `<main class="page-narrow">
     <header class="plain-header">
-      <h1>档案</h1>
+      <h1>归档</h1>
       <p>所有已经发表的文字。</p>
     </header>
     ${archive}
   </main>`;
 
-  return pageShell({ title: "档案", description: "所有文章档案", body, canonical: "/archive.html" });
+  return pageShell({ title: "归档", description: "所有文章归档", body, canonical: "/archive.html", footerText: posts[0]?.excerpt });
 }
 
 function renderPost(post) {
@@ -354,7 +372,8 @@ function renderPost(post) {
     title: post.title,
     description: post.description || config.description,
     body,
-    canonical: `/posts/${post.slug}/`
+    canonical: `/posts/${post.slug}/`,
+    footerText: post.excerpt
   });
 }
 
