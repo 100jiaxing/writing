@@ -183,6 +183,11 @@ function formatDate(dateString) {
   }).format(new Date(`${dateString}T00:00:00`));
 }
 
+function formatPostTime(post) {
+  if (!post.time || post.time === "00:00:00") return "";
+  return post.time.slice(0, 5);
+}
+
 function quoteForToday() {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
@@ -291,9 +296,15 @@ function renderHome(posts) {
   const latest = posts[0];
   const quote = quoteForToday();
   const footerText = latest?.excerpt || config.description;
-  const list = posts
+  const morePosts = posts.slice(1);
+  const latestCard = latest ? `<article class="latest-card">
+      <time datetime="${escapeHtml(`${latest.date}T${latest.time}`)}">${escapeHtml(formatDate(latest.date))}${formatPostTime(latest) ? ` ${escapeHtml(formatPostTime(latest))}` : ""}</time>
+      <h2><a href="${escapeHtml(urlPath(`/posts/${latest.slug}/`))}">${escapeHtml(latest.title)}</a></h2>
+      <p>${escapeHtml(latest.description || latest.excerpt)}</p>
+    </article>` : "<p>还没有文章。</p>";
+  const list = morePosts
     .map((post) => `<article class="post-row">
-      <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
+      <time datetime="${escapeHtml(`${post.date}T${post.time}`)}">${escapeHtml(formatDate(post.date))}${formatPostTime(post) ? ` ${escapeHtml(formatPostTime(post))}` : ""}</time>
       <div>
         <h2><a href="${escapeHtml(urlPath(`/posts/${post.slug}/`))}">${escapeHtml(post.title)}</a></h2>
         <p>${escapeHtml(post.description)}</p>
@@ -317,10 +328,13 @@ function renderHome(posts) {
     </section>
     <section class="writing-list" aria-labelledby="latest-writing">
       <div class="section-title">
-        <h2 id="latest-writing">最近文章</h2>
-        <p>Markdown 写在 <code>posts/</code>，页面由脚本生成。</p>
+        <h2 id="latest-writing">最新文章</h2>
+        <p>首页只突出最新一篇，完整列表在归档页。</p>
       </div>
-      <div class="post-list">${list || "<p>还没有文章。</p>"}</div>
+      <div class="home-posts">
+        ${latestCard}
+        ${list ? `<div class="post-list more-posts">${list}</div>` : ""}
+      </div>
     </section>
     ${renderDailyQuoteScript()}
   </main>`;
