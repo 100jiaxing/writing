@@ -272,7 +272,6 @@ function pageShell({ title, description, body, canonical = "", footerText = "" }
     <nav class="nav" aria-label="主导航">
       <a href="${escapeHtml(urlPath("/"))}">文章</a>
       <a href="${escapeHtml(urlPath("/archive.html"))}">归档</a>
-      <a href="${escapeHtml(urlPath("/rss.xml"))}">RSS</a>
     </nav>
   </header>
   ${body}
