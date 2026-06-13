@@ -1,0 +1,14 @@
+{
+  "name": "kafka-writing-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "node scripts/build.js --watch",
+    "publish": "bash scripts/publish.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
