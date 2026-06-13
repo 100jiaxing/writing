@@ -229,6 +229,12 @@ function plainTextFromMarkdown(markdown = "") {
     .filter(Boolean)[0] || "";
 }
 
+function firstSentence(value = "") {
+  const text = value.replace(/\s+/g, " ").trim();
+  const match = text.match(/^.+?[。！？!?]/);
+  return match ? match[0] : text;
+}
+
 function readPosts() {
   if (!fs.existsSync(postsDir)) return [];
 
@@ -249,7 +255,7 @@ function readPosts() {
         description: data.description || "",
         tags,
         html: markdownToHtml(body),
-        excerpt: plainTextFromMarkdown(body)
+        excerpt: firstSentence(plainTextFromMarkdown(body))
       };
     })
     .sort((a, b) => {
@@ -296,18 +302,12 @@ function renderHome(posts) {
   const latest = posts[0];
   const quote = quoteForToday();
   const footerText = latest?.excerpt || config.description;
-  const morePosts = posts.slice(1);
-  const latestCard = latest ? `<article class="latest-card">
-      <time datetime="${escapeHtml(`${latest.date}T${latest.time}`)}">${escapeHtml(formatDate(latest.date))}${formatPostTime(latest) ? ` ${escapeHtml(formatPostTime(latest))}` : ""}</time>
-      <h2><a href="${escapeHtml(urlPath(`/posts/${latest.slug}/`))}">${escapeHtml(latest.title)}</a></h2>
-      <p>${escapeHtml(latest.description || latest.excerpt)}</p>
-    </article>` : "<p>还没有文章。</p>";
-  const list = morePosts
+  const list = posts
     .map((post) => `<article class="post-row">
       <time datetime="${escapeHtml(`${post.date}T${post.time}`)}">${escapeHtml(formatDate(post.date))}${formatPostTime(post) ? ` ${escapeHtml(formatPostTime(post))}` : ""}</time>
       <div>
         <h2><a href="${escapeHtml(urlPath(`/posts/${post.slug}/`))}">${escapeHtml(post.title)}</a></h2>
-        <p>${escapeHtml(post.description)}</p>
+        <p>${escapeHtml(post.description || post.excerpt)}</p>
       </div>
     </article>`)
     .join("\n");
@@ -328,13 +328,10 @@ function renderHome(posts) {
     </section>
     <section class="writing-list" aria-labelledby="latest-writing">
       <div class="section-title">
-        <h2 id="latest-writing">最新文章</h2>
-        <p>首页只突出最新一篇，完整列表在归档页。</p>
+        <h2 id="latest-writing">最近文章</h2>
+        <p>按发表时间排列，完整列表在归档页。</p>
       </div>
-      <div class="home-posts">
-        ${latestCard}
-        ${list ? `<div class="post-list more-posts">${list}</div>` : ""}
-      </div>
+      <div class="post-list">${list || "<p>还没有文章。</p>"}</div>
     </section>
     ${renderDailyQuoteScript()}
   </main>`;

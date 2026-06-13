@@ -48,7 +48,7 @@ function parseBody(raw) {
 }
 
 function excerptFromMarkdown(markdown) {
-  return markdown
+  const text = markdown
     .replace(/```[\s\S]*?```/g, "")
     .replace(/^#{1,6}\s+/gm, "")
     .replace(/[*_`>#-]/g, "")
@@ -56,6 +56,8 @@ function excerptFromMarkdown(markdown) {
     .split(/\n{2,}/)
     .map((block) => block.replace(/\s+/g, " ").trim())
     .filter(Boolean)[0] || "";
+  const match = text.match(/^.+?[。！？!?]/);
+  return match ? match[0] : text;
 }
 
 const title = stripPublishPrefix(titleInput);

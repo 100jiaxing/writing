@@ -260,17 +260,6 @@ img {
   border-top: 1px solid var(--line);
 }
 
-.home-posts {
-  display: grid;
-  gap: 34px;
-}
-
-.latest-card {
-  padding: clamp(26px, 4vw, 42px);
-  border: 1px solid var(--line);
-  background: var(--paper);
-}
-
 .post-row {
   display: grid;
   grid-template-columns: 172px 1fr;
@@ -280,33 +269,12 @@ img {
 }
 
 .post-row time,
-.latest-card time,
 .article-header time,
 .archive-item time,
 .back-link {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 13px;
   color: var(--muted);
-}
-
-.latest-card h2 {
-  max-width: 16ch;
-  margin: 16px 0 0;
-  font-size: clamp(34px, 4.6vw, 62px);
-  line-height: 1.08;
-  font-weight: 500;
-  text-wrap: balance;
-}
-
-.latest-card h2 a {
-  text-decoration: none;
-}
-
-.latest-card p {
-  max-width: 46rem;
-  margin: 18px 0 0;
-  color: var(--muted);
-  font-size: clamp(17px, 1.6vw, 20px);
 }
 
 .post-row h2 {
@@ -574,19 +542,6 @@ img {
 
   .post-row {
     gap: 8px;
-  }
-
-  .home-posts {
-    gap: 26px;
-  }
-
-  .latest-card {
-    padding: 22px 18px 24px;
-  }
-
-  .latest-card h2 {
-    max-width: 13ch;
-    font-size: clamp(29px, 8.5vw, 42px);
   }
 
   .archive-item {
