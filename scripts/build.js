@@ -260,6 +260,17 @@ function plainTextFromMarkdown(markdown = "") {
     .filter(Boolean)[0] || "";
 }
 
+function fullTextFromMarkdown(markdown = "") {
+  return markdown
+    .replace(/^---\n[\s\S]*?\n---\n?/, "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[*_`>#-]/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function firstSentence(value = "") {
   const text = value.replace(/\s+/g, " ").trim();
   const match = text.match(/^.+?[。！？!?]/);
@@ -279,6 +290,7 @@ function readPosts() {
       const postData = { ...data, ...inline.data };
       const slug = postData.slug || slugify(file);
       const tags = postData.tags ? postData.tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [];
+      const text = fullTextFromMarkdown(inline.body);
       return {
         file,
         slug,
@@ -288,7 +300,8 @@ function readPosts() {
         description: postData.description || "",
         tags,
         html: markdownToHtml(inline.body),
-        excerpt: firstSentence(plainTextFromMarkdown(inline.body))
+        excerpt: firstSentence(plainTextFromMarkdown(inline.body)),
+        text
       };
     })
     .sort((a, b) => {
@@ -321,6 +334,7 @@ function pageShell({ title, description, body, canonical = "", footerText = "" }
     <nav class="nav" aria-label="主导航">
       <a href="${escapeHtml(urlPath("/"))}">文章</a>
       <a href="${escapeHtml(urlPath("/archive.html"))}">归档</a>
+      <a href="${escapeHtml(urlPath("/search.html"))}">搜索</a>
     </nav>
   </header>
   ${body}
@@ -403,6 +417,24 @@ function renderArchive(posts) {
   return pageShell({ title: "归档", description: "所有文章归档", body, canonical: "/archive.html", footerText: posts[0]?.excerpt });
 }
 
+function renderSearch(posts) {
+  const body = `<main class="page-narrow search-page">
+    <header class="plain-header">
+      <h1>搜索</h1>
+      <p>搜索标题、摘要、标签和正文全文。</p>
+    </header>
+    <section class="search-panel" aria-label="文章搜索">
+      <label class="search-label" for="search-input">关键词</label>
+      <input id="search-input" class="search-input" type="search" placeholder="输入标题或正文里的词句" autocomplete="off" autofocus>
+      <p id="search-status" class="search-status">${posts.length ? `共 ${posts.length} 篇文章可搜索。` : "还没有文章。"}</p>
+    </section>
+    <section id="search-results" class="search-results" aria-live="polite"></section>
+    <script src="${escapeHtml(urlPath("/js/search.js"))}" defer></script>
+  </main>`;
+
+  return pageShell({ title: "搜索", description: "搜索文章标题与全文", body, canonical: "/search.html", footerText: posts[0]?.excerpt });
+}
+
 function renderPost(post) {
   const tags = post.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
   const body = `<main class="article-shell">
@@ -425,6 +457,21 @@ function renderPost(post) {
     canonical: `/posts/${post.slug}/`,
     footerText: post.excerpt
   });
+}
+
+function renderSearchIndex(posts) {
+  const index = posts.map((post) => ({
+    title: post.title,
+    date: post.date,
+    time: post.time,
+    description: post.description,
+    excerpt: post.excerpt,
+    tags: post.tags,
+    text: post.text,
+    url: urlPath(`/posts/${post.slug}/`)
+  }));
+
+  return `${JSON.stringify(index).replaceAll("<", "\\u003c")}\n`;
 }
 
 function renderRss(posts) {
@@ -474,6 +521,8 @@ function build() {
 
   fs.writeFileSync(path.join(distDir, "index.html"), renderHome(posts));
   fs.writeFileSync(path.join(distDir, "archive.html"), renderArchive(posts));
+  fs.writeFileSync(path.join(distDir, "search.html"), renderSearch(posts));
+  fs.writeFileSync(path.join(distDir, "search-index.json"), renderSearchIndex(posts));
   fs.writeFileSync(path.join(distDir, "rss.xml"), renderRss(posts));
 
   for (const post of posts) {
