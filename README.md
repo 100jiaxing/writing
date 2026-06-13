@@ -57,6 +57,19 @@ git push -u origin main
 4. 在 GitHub 仓库页面打开 `Settings -> Pages`，Source 选择 `GitHub Actions`。
 5. 以后只需要写 Markdown 并运行 `npm run publish`。
 
+## 手机发表
+
+适合在锤子便签里写完后快速发布：
+
+1. 复制便签全文。
+2. 打开 GitHub 仓库的 `Issues`。
+3. 新建 Issue，标题写文章标题。
+4. 正文粘贴 Markdown。
+5. 可选：正文第一行写 `标签：日记, 小说`。
+6. 给 Issue 添加 `publish` 标签。
+
+保存后 GitHub Actions 会自动把 Issue 变成 `posts/` 里的 Markdown 文件，并触发 Pages 发布。
+
 ## 配置
 
 编辑 `site.config.json`：

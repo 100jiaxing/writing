@@ -1,0 +1,64 @@
+name: Publish From Issue
+
+on:
+  issues:
+    types:
+      - opened
+      - labeled
+      - edited
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  publish:
+    if: >-
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'publish')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Create markdown post
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: node scripts/publish-from-issue.js
+
+      - name: Commit post
+        run: |
+          POST_FILE=$(cat published-post-path.txt)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "posts/${POST_FILE}"
+          git commit -m "Publish ${POST_FILE}"
+          git push
+
+      - name: Comment and close issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const postFile = fs.readFileSync("published-post-path.txt", "utf8").trim();
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `已发布为 \`posts/${postFile}\`。GitHub Pages 会在稍后自动更新。`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: "closed"
+            });
