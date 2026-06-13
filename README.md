@@ -50,6 +50,8 @@ npm run publish
 
 这个命令会执行构建、提交变更并 `git push`。GitHub Actions 会把 `dist/` 发布到 GitHub Pages。
 
+如果你同时用手机 Issue 和电脑本地发布，脚本会在推送前自动同步远端提交，避免因为手机端已经发表过文章而导致本地 `git push` 被拒绝。
+
 ## 第一次部署
 
 1. 在 GitHub 新建一个仓库。

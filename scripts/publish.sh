@@ -15,13 +15,21 @@ if ! git remote get-url origin >/dev/null 2>&1; then
   exit 1
 fi
 
-git add posts public site.config.json scripts package.json README.md .github .gitignore
-
-if git diff --cached --quiet; then
-  echo "No changes to publish."
-  exit 0
+branch=$(git branch --show-current)
+if [[ -z "$branch" ]]; then
+  echo "Cannot publish while Git is in detached HEAD state."
+  exit 1
 fi
 
-message=${1:-"Publish writing $(date +%Y-%m-%d)"}
-git commit -m "$message"
-git push
+git add posts public site.config.json scripts package.json README.md .github .gitignore
+
+if ! git diff --cached --quiet; then
+  message=${1:-"Publish writing $(date +%Y-%m-%d)"}
+  git commit -m "$message"
+else
+  echo "No new local changes to commit."
+fi
+
+echo "Syncing with origin/$branch before pushing..."
+git pull --rebase --autostash origin "$branch"
+git push origin "$branch"
