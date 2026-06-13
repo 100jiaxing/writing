@@ -85,6 +85,37 @@ function parseFrontmatter(raw, fileName) {
   return { data, body: match[2] };
 }
 
+function parseInlineMetadata(body = "") {
+  const lines = body.replace(/\r\n/g, "\n").split("\n");
+  const data = {};
+
+  for (let i = 0; i < Math.min(2, lines.length); i += 1) {
+    const line = lines[i].trim();
+    const descMatch = line.match(/^desc:\s+(.+)$/i);
+    const tagsMatch = line.match(/^tags\s+(.+)$/i) || line.match(/^tags:\s+(.+)$/i);
+
+    if (descMatch) {
+      data.description = descMatch[1].trim();
+      lines[i] = "";
+      continue;
+    }
+
+    if (tagsMatch) {
+      data.tags = tagsMatch[1]
+        .split(/[、,，]/)
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+        .join(", ");
+      lines[i] = "";
+    }
+  }
+
+  return {
+    data,
+    body: lines.join("\n").replace(/^\n+/, "")
+  };
+}
+
 function inlineMarkdown(text) {
   let html = escapeHtml(text);
   html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
@@ -244,18 +275,20 @@ function readPosts() {
     .map((file) => {
       const raw = fs.readFileSync(path.join(postsDir, file), "utf8");
       const { data, body } = parseFrontmatter(raw, file);
-      const slug = data.slug || slugify(file);
-      const tags = data.tags ? data.tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [];
+      const inline = parseInlineMetadata(body);
+      const postData = { ...data, ...inline.data };
+      const slug = postData.slug || slugify(file);
+      const tags = postData.tags ? postData.tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [];
       return {
         file,
         slug,
-        title: data.title || file.replace(/\.md$/, ""),
-        date: data.date || "1970-01-01",
-        time: data.time || "00:00:00",
-        description: data.description || "",
+        title: postData.title || file.replace(/\.md$/, ""),
+        date: postData.date || "1970-01-01",
+        time: postData.time || "00:00:00",
+        description: postData.description || "",
         tags,
-        html: markdownToHtml(body),
-        excerpt: firstSentence(plainTextFromMarkdown(body))
+        html: markdownToHtml(inline.body),
+        excerpt: firstSentence(plainTextFromMarkdown(inline.body))
       };
     })
     .sort((a, b) => {

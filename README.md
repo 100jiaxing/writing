@@ -23,6 +23,17 @@ tags: 日记, 小说
 正文写在这里。
 ```
 
+也可以不用完整 frontmatter，在正文最前两行写快捷元数据：
+
+```md
+desc: 这一句会成为文章摘要。
+tags 日记、小说、读书
+
+正文从这里开始。
+```
+
+`desc: ` 后面是摘要。`tags ` 后面是标签，多个标签用 `、` 分开。
+
 ## 本地构建
 
 ```bash
@@ -65,7 +76,11 @@ git push -u origin main
 2. 打开 GitHub 仓库的 `Issues`。
 3. 新建 Issue，标题写文章标题。
 4. 正文粘贴 Markdown。
-5. 可选：正文第一行写 `标签：日记, 小说`。
+5. 可选：正文前两行写：
+   ```text
+   desc: 这一句会成为文章摘要。
+   tags 日记、小说
+   ```
 6. 给 Issue 添加 `publish` 标签。
 
 保存后 GitHub Actions 会自动把 Issue 变成 `posts/` 里的 Markdown 文件，并触发 Pages 发布。

@@ -27,22 +27,35 @@ function escapeYaml(value = "") {
 function parseBody(raw) {
   const lines = raw.replace(/\r\n/g, "\n").split("\n");
   let tags = [];
+  let description = "";
 
   while (lines.length && !lines[0].trim()) lines.shift();
 
-  const tagMatch = lines[0]?.match(/^(?:标签|tags)\s*[:：]\s*(.+)$/i);
-  if (tagMatch) {
-    tags = tagMatch[1]
-      .split(/[,，、]/)
-      .map((tag) => tag.trim())
-      .filter(Boolean);
-    lines.shift();
+  for (let i = 0; i < Math.min(2, lines.length); i += 1) {
+    const line = lines[i].trim();
+    const descMatch = line.match(/^desc:\s+(.+)$/i);
+    const tagsMatch = line.match(/^tags\s+(.+)$/i) || line.match(/^tags:\s+(.+)$/i) || line.match(/^标签\s*[:：]\s*(.+)$/);
+
+    if (descMatch) {
+      description = descMatch[1].trim();
+      lines[i] = "";
+      continue;
+    }
+
+    if (tagsMatch) {
+      tags = tagsMatch[1]
+        .split(/[、,，]/)
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+      lines[i] = "";
+    }
   }
 
   while (lines.length && !lines[0].trim()) lines.shift();
 
   return {
     content: lines.join("\n").trim(),
+    description,
     tags
   };
 }
@@ -65,7 +78,7 @@ if (!title) {
   throw new Error("Issue title is empty. Use the article title as the issue title.");
 }
 
-const { content, tags } = parseBody(bodyInput);
+const { content, description: inlineDescription, tags } = parseBody(bodyInput);
 if (!content) {
   throw new Error("Issue body is empty. Put the article Markdown in the issue body.");
 }
@@ -92,7 +105,7 @@ if (fs.existsSync(filePath)) {
   filePath = path.join(postsDir, fileName);
 }
 
-const description = excerptFromMarkdown(content).slice(0, 120);
+const description = (inlineDescription || excerptFromMarkdown(content)).slice(0, 120);
 const frontmatter = [
   "---",
   `title: ${escapeYaml(title)}`,
