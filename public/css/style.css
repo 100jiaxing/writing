@@ -191,6 +191,7 @@ img {
   margin-top: 20px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 13px;
+  text-align: right;
   color: var(--accent);
 }
 
@@ -498,6 +499,7 @@ img {
   .hero-quote figcaption {
     margin-top: 16px;
     font-size: 12px;
+    text-align: right;
   }
 
   .hero-copy > p {

@@ -10,13 +10,13 @@ const distDir = path.join(root, "dist");
 const watchMode = process.argv.includes("--watch");
 const basePath = getBasePath();
 const dailyQuotes = [
-  { text: "生存还是毁灭，这是一个问题。", source: "莎士比亚" },
-  { text: "认识你自己。", source: "苏格拉底" },
-  { text: "人不是生来要给打败的。", source: "海明威" },
-  { text: "黑夜给了我黑色的眼睛。", source: "顾城" },
-  { text: "凡是过去，皆为序章。", source: "莎士比亚" },
-  { text: "世界以痛吻我，要我报之以歌。", source: "泰戈尔" },
-  { text: "生活不可能像你想象得那么好。", source: "莫泊桑" }
+  { text: "生存还是毁灭，这是一个问题。", author: "莎士比亚", work: "哈姆雷特" },
+  { text: "人不是生来要给打败的。", author: "海明威", work: "老人与海" },
+  { text: "黑夜给了我黑色的眼睛。", author: "顾城", work: "一代人" },
+  { text: "凡是过去，皆为序章。", author: "莎士比亚", work: "暴风雨" },
+  { text: "世界以痛吻我，要我报之以歌。", author: "泰戈尔", work: "飞鸟集" },
+  { text: "生活不可能像你想象得那么好。", author: "莫泊桑", work: "一生" },
+  { text: "我荒废了时间，时间便把我荒废了。", author: "莎士比亚", work: "理查二世" }
 ];
 
 function getBasePath() {
@@ -204,7 +204,7 @@ function renderDailyQuoteScript() {
           const day = Math.floor((new Date() - start) / 86400000);
           const quote = quotes[day % quotes.length];
           quoteNode.textContent = quote.text;
-          sourceNode.textContent = \`出自 \${quote.source}\`;
+          sourceNode.textContent = \`\${quote.author}《\${quote.work}》\`;
         } catch {
           return;
         }
@@ -305,7 +305,7 @@ function renderHome(posts) {
           <blockquote>
             <h1 id="daily-quote">${escapeHtml(quote.text)}</h1>
           </blockquote>
-          <figcaption id="daily-quote-source">出自 ${escapeHtml(quote.source)}</figcaption>
+          <figcaption id="daily-quote-source">${escapeHtml(quote.author)}《${escapeHtml(quote.work)}》</figcaption>
         </figure>
         <p>${escapeHtml(footerText)}</p>
         ${latest ? `<a class="primary-link" href="${escapeHtml(urlPath(`/posts/${latest.slug}/`))}">读最新一篇</a>` : ""}
