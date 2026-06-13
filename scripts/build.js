@@ -339,10 +339,12 @@ function renderArchive(posts) {
   const archive = Array.from(grouped.entries())
     .map(([year, items]) => `<section class="archive-year">
       <h2>${escapeHtml(year)}</h2>
-      ${items.map((post) => `<a class="archive-item" href="${escapeHtml(urlPath(`/posts/${post.slug}/`))}">
+      <div class="archive-items">
+        ${items.map((post) => `<a class="archive-item" href="${escapeHtml(urlPath(`/posts/${post.slug}/`))}">
         <span>${escapeHtml(post.title)}</span>
         <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDate(post.date))}</time>
       </a>`).join("\n")}
+      </div>
     </section>`)
     .join("\n");
 

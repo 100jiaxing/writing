@@ -313,11 +313,17 @@ img {
   font-size: clamp(28px, 4vw, 48px);
 }
 
+.archive-items {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+
 .archive-item {
   display: flex;
   justify-content: space-between;
   gap: 24px;
-  padding: 13px 0;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
   text-decoration: none;
 }
 
@@ -540,6 +546,6 @@ img {
 
   .archive-item {
     display: grid;
-    gap: 4px;
+    gap: 5px;
   }
 }
