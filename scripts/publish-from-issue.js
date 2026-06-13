@@ -30,7 +30,7 @@ function parseBody(raw) {
 
   while (lines.length && !lines[0].trim()) lines.shift();
 
-  const tagMatch = lines[0]?.match(/^标签\s*[:：]\s*(.+)$/);
+  const tagMatch = lines[0]?.match(/^(?:标签|tags)\s*[:：]\s*(.+)$/i);
   if (tagMatch) {
     tags = tagMatch[1]
       .split(/[,，、]/)
@@ -74,6 +74,13 @@ const date = new Intl.DateTimeFormat("en-CA", {
   month: "2-digit",
   day: "2-digit"
 }).format(new Date());
+const time = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Shanghai",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false
+}).format(new Date());
 const slug = slugify(title) || `issue-${issueNumber}`;
 let fileName = `${date}-${slug}.md`;
 let filePath = path.join(postsDir, fileName);
@@ -88,6 +95,7 @@ const frontmatter = [
   "---",
   `title: ${escapeYaml(title)}`,
   `date: ${date}`,
+  `time: ${time}`,
   `description: ${escapeYaml(description)}`,
   tags.length ? `tags: ${tags.join(", ")}` : "tags: 写作",
   "---",

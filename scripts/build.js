@@ -240,13 +240,18 @@ function readPosts() {
         slug,
         title: data.title || file.replace(/\.md$/, ""),
         date: data.date || "1970-01-01",
+        time: data.time || "00:00:00",
         description: data.description || "",
         tags,
         html: markdownToHtml(body),
         excerpt: plainTextFromMarkdown(body)
       };
     })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .sort((a, b) => {
+      const byDateTime = new Date(`${b.date}T${b.time}`) - new Date(`${a.date}T${a.time}`);
+      if (byDateTime !== 0) return byDateTime;
+      return b.file.localeCompare(a.file, "zh-CN");
+    });
 }
 
 function pageShell({ title, description, body, canonical = "", footerText = "" }) {
